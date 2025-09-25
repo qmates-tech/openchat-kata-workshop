@@ -17,7 +17,7 @@ export const createUserFactory = (posts: Post[] = []) => {
   })
 }
 
-export const createUserFactoryWithPosts = () =>
+export const createUserWithPostsFactory = () =>
   createUserFactory([
     Post.createFromAttributes({ postId: 'p-1-2-3-4', text: 'text 1', dateTime: '2025-09-13T12:00:00Z' }),
     Post.createFromAttributes({ postId: 'p-5-6-7-8', text: 'text 2', dateTime: '2025-09-13T12:00:00Z' }),

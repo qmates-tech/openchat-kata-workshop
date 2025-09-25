@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { UserRepositorySqlite } from '../../../src/infrastructure/repositories/UserRepositorySqlite'
 import connect from '@databases/sqlite'
 import { User } from '../../../src/domain/aggregates/User'
-import { createUserFactory, createUserFactoryWithPosts, DATE_TIME_PATTERN } from '../../Utils'
+import { createUserFactory, createUserWithPostsFactory, DATE_TIME_PATTERN } from '../../Utils'
 import { Post } from '../../../src/domain/entities/Post'
 
 describe('User repository', () => {
@@ -88,7 +88,7 @@ describe('User repository', () => {
       })
 
       it('should return a user with posts when posts exist', async () => {
-        await repository.save(createUserFactoryWithPosts())
+        await repository.save(createUserWithPostsFactory())
         const retrievedUser = await repository.get('1-2-3-4-5')
 
         expect(retrievedUser).not.toBeNull()
@@ -124,7 +124,7 @@ describe('User repository', () => {
       })
 
       it('should return user without posts (getByUsername does not include posts)', async () => {
-        await repository.save(createUserFactoryWithPosts())
+        await repository.save(createUserWithPostsFactory())
         const retrievedUser = await repository.getByUsername('username')
 
         expect(retrievedUser).not.toBeNull()
@@ -135,7 +135,7 @@ describe('User repository', () => {
 
   describe('post-related functionality', () => {
     it('should preserve dateTime when retrieving posts', async () => {
-      await repository.save(createUserFactoryWithPosts())
+      await repository.save(createUserWithPostsFactory())
       const retrievedUser = await repository.get('1-2-3-4-5')
 
       expect(retrievedUser?.posts[0]).toHaveProperty('dateTime')
@@ -157,7 +157,7 @@ describe('User repository', () => {
     })
 
     it('should save a user with posts', async () => {
-      await repository.save(createUserFactoryWithPosts())
+      await repository.save(createUserWithPostsFactory())
 
       const savedUser = await repository.get('1-2-3-4-5')
       expect(savedUser?.posts).toHaveLength(2)
