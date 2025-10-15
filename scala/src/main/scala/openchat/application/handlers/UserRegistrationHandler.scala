@@ -15,19 +15,20 @@ final class UserRegistrationHandler(
   userRepository: UserRepository,
   uuidWrapper: UuidWrapper
 )(implicit ec: ExecutionContext)
-  extends Handler[CreateUser, Either[UserRegistrationError, UserCreated]] {
+    extends Handler[CreateUser, Either[UserRegistrationError, UserCreated]] {
 
   def handle(createUser: CreateUser): Future[Either[UserRegistrationError, UserCreated]] = {
     for {
       exists <- usernameService.usernameExists(createUser.username)
-      result <- if (exists) {
-        Future.successful(Left(UsernameAlreadyExists))
-      } else {
-        val user = User.create(uuidWrapper.generateUuid(), createUser)
-        userRepository.save(user).map(_ =>
-          Right(UserCreated(id = user.userId, username = createUser.username, about = createUser.about))
-        )
-      }
+      result <-
+        if (exists) {
+          Future.successful(Left(UsernameAlreadyExists))
+        } else {
+          val user = User.create(uuidWrapper.generateUuid(), createUser)
+          userRepository
+            .save(user)
+            .map(_ => Right(UserCreated(id = user.userId, username = createUser.username, about = createUser.about)))
+        }
     } yield result
   }
 }

@@ -2,11 +2,9 @@ package openchat.unit.component
 
 import doobie.Transactor
 import openchat.application.handlers.{LoginHandler, LoginUser}
-import openchat.domain.aggregates.User
-import openchat.domain.commands.CreateUser
 import openchat.infrastructure.repositories.UserRepositoryDoobie
+import openchat.unit.TestHelpers._
 import openchat.utilities.DatabaseTestUtils
-import openchat.utilities.Utils.createUser
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AsyncFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -27,20 +25,18 @@ class LoginHandlerSpec extends AsyncFunSuite with Matchers with BeforeAndAfterEa
   }
 
   test("returns Some(UserLoggedIn) on valid username/password") {
-    val user = User.create("uid-1", CreateUser("alice", "about", "secret"))
+    val user = createTestUser(id = "uid-1", username = "alice", password = "secret", about = "about")
 
     for {
       _   <- repo.save(user)
       res <- handler.handle(LoginUser("alice", "secret"))
     } yield {
-      res.isDefined shouldBe true
+      res shouldBe defined
       val u = res.get
       u.id shouldBe "uid-1"
       u.username shouldBe "alice"
       u.about shouldBe "about"
-      // Check that password is not leaked in the response
-      val resultFields = u.productElementNames.toSet
-      resultFields should not contain "password"
+      u.productElementNames.toSet should not contain "password"
     }
   }
 
@@ -49,7 +45,7 @@ class LoginHandlerSpec extends AsyncFunSuite with Matchers with BeforeAndAfterEa
   }
 
   test("returns None when password is wrong") {
-    val user = User.create("uid-2", CreateUser("bob", "", "right"))
+    val user = createTestUser(id = "uid-2", username = "bob", password = "right", about = "")
 
     for {
       _   <- repo.save(user)

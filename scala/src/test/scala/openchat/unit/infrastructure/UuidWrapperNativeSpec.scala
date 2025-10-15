@@ -62,7 +62,7 @@ class UuidWrapperNativeSpec extends AnyFunSuite with Matchers with TableDrivenPr
       ("UUID with invalid character z", "550e8400-e29b-41d4-z716-446655440000")
     )
     forAll(invalidUuids) { (description: String, invalidUuid: String) =>
-    withClue(s"Testing $description: ") {
+      withClue(s"Testing $description: ") {
         UuidWrapper.isValidUuid(invalidUuid) shouldBe false
       }
     }
@@ -80,7 +80,7 @@ class UuidWrapperNativeSpec extends AnyFunSuite with Matchers with TableDrivenPr
       ("UUID v5", "550e8400-e29b-51d4-a716-446655440000")
     )
     forAll(otherVersionUuids) { (description: String, uuid: String) =>
-    withClue(s"Testing $description: ") {
+      withClue(s"Testing $description: ") {
         UuidWrapper.isValidUuid(uuid) shouldBe false
       }
     }

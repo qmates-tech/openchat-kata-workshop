@@ -10,7 +10,6 @@ import org.scalatest.matchers.should.Matchers
 
 class UserSpec extends AnyFunSuite with Matchers {
 
-
   test("login should return true for valid password") {
     val user = createUser()
 
@@ -30,7 +29,7 @@ class UserSpec extends AnyFunSuite with Matchers {
   }
 
   test("create preserves attributes as-is (including blank/space about)") {
-    val id = (new UuidWrapperNative).generateUuid()
+    val id      = (new UuidWrapperNative).generateUuid()
     val created = User.create(id, CreateUser(username = "alice", password = "secret", about = "  "))
 
     created.userId shouldBe id
@@ -40,7 +39,7 @@ class UserSpec extends AnyFunSuite with Matchers {
     created.posts shouldBe empty
   }
 
-    test("addPost should add a post to the user posts array") {
+  test("addPost should add a post to the user posts array") {
     val user = createUser()
     val post = Post(
       postId = "post-1-2-3-4",
@@ -55,7 +54,7 @@ class UserSpec extends AnyFunSuite with Matchers {
   }
 
   test("addPost should add multiple posts to the user posts array") {
-    val user = createUser()
+    val user  = createUser()
     val post1 = Post(
       postId = "post-1-2-3-4",
       text = "First test post",
@@ -67,7 +66,7 @@ class UserSpec extends AnyFunSuite with Matchers {
       dateTime = "2025-09-13T13:00:00Z"
     )
 
-    val userWithPost1 = user.addPost(post1)
+    val userWithPost1     = user.addPost(post1)
     val userWithBothPosts = userWithPost1.addPost(post2)
 
     userWithBothPosts.posts should have length 2
@@ -81,7 +80,7 @@ class UserSpec extends AnyFunSuite with Matchers {
       text = "Existing post",
       dateTime = "2025-09-13T11:00:00Z"
     )
-    val user = createUser(Vector(existingPost))
+    val user    = createUser(Vector(existingPost))
     val newPost = Post(
       postId = "p-5-6-7-8",
       text = "New post",
@@ -96,12 +95,12 @@ class UserSpec extends AnyFunSuite with Matchers {
   }
 
   test("addPost allows duplicate postId entries (documented behavior)") {
-    val user = createUser()
+    val user   = createUser()
     val sameId = "33333333-3333-4333-8333-333333333333"
-    val dup1 = Post(postId = sameId, text = "same id 1", dateTime = "2025-01-01T00:00:00.000Z")
-    val dup2 = Post(postId = sameId, text = "same id 2", dateTime = "2025-01-02T00:00:00.000Z")
+    val dup1   = Post(postId = sameId, text = "same id 1", dateTime = "2025-01-01T00:00:00.000Z")
+    val dup2   = Post(postId = sameId, text = "same id 2", dateTime = "2025-01-02T00:00:00.000Z")
 
-    val userWithDup1 = user.addPost(dup1)
+    val userWithDup1     = user.addPost(dup1)
     val userWithBothDups = userWithDup1.addPost(dup2)
 
     userWithBothDups.posts should have length 2

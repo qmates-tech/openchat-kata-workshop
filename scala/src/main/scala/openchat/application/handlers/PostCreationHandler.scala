@@ -18,15 +18,19 @@ final class PostCreationHandler(userRepository: UserRepository, uuidWrapper: Uui
   def handle(cmd: CreatePost): Future[Either[PostCreationError, PostCreated]] = {
     for {
       maybeUser <- userRepository.get(cmd.userId)
-      result <- maybeUser match {
-        case None => Future.successful(Left(UserNotFound))
+      result    <- maybeUser match {
+        case None       => Future.successful(Left(UserNotFound))
         case Some(user) =>
           Post.create(uuidWrapper.generateUuid(), cmd, clock) match {
-            case Left(_) => Future.successful(Left(InvalidPost))
+            case Left(_)     => Future.successful(Left(InvalidPost))
             case Right(post) =>
-              userRepository.save(user.addPost(post)).map(_ =>
-                Right(PostCreated(postId = post.postId, userId = cmd.userId, text = post.text, dateTime = post.dateTime))
-              )
+              userRepository
+                .save(user.addPost(post))
+                .map(_ =>
+                  Right(
+                    PostCreated(postId = post.postId, userId = cmd.userId, text = post.text, dateTime = post.dateTime)
+                  )
+                )
           }
       }
     } yield result

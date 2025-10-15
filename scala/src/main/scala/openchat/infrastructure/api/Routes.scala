@@ -11,9 +11,9 @@ final class Routes(
   login: LoginHandler,
   postCreation: PostCreationHandler,
   timelineQuery: TimelineQueryHandler
-                  )(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext) {
 
-  private val userRoutes = new UserRoutes(userRegistration, postCreation, timelineQuery)
+  private val userRoutes  = new UserRoutes(userRegistration, postCreation, timelineQuery)
   private val loginRoutes = new LoginRoutes(login)
 
   val route: Route = userRoutes.route ~ loginRoutes.route

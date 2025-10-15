@@ -7,8 +7,9 @@ import openchat.domain.commands.CreatePost
 import openchat.domain.errors.UserNotFound
 import openchat.infrastructure.repositories.UserRepositoryDoobie
 import openchat.infrastructure.wrapper.UuidWrapperNative
+import openchat.unit.TestHelpers._
 import openchat.utilities.DatabaseTestUtils
-import openchat.utilities.Utils.{DATE_TIME_PATTERN, createUser}
+import openchat.utilities.Utils.DATE_TIME_PATTERN
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AsyncFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -33,30 +34,29 @@ class PostCreationHandlerSpec extends AsyncFunSuite with Matchers with BeforeAnd
   }
 
   test("when creating a new post should return the created post data") {
-    val alreadyExistingUser = createUser()
+    val user = createTestUser()
 
     for {
-      _      <- repo.save(alreadyExistingUser)
-      result <- handler.handle(CreatePost(userId = alreadyExistingUser.userId, text = "a text"))
+      _      <- repo.save(user)
+      result <- handler.handle(CreatePost(userId = user.userId, text = "a text"))
     } yield {
-      result.isRight shouldBe true
-      val created = result.getOrElse(fail("Expected Right but got Left"))
+      val created = assertRight(result)
       created.postId should fullyMatch regex UUID_PATTERN
-      created.userId shouldBe alreadyExistingUser.userId
+      created.userId shouldBe user.userId
       created.text shouldBe "a text"
       created.dateTime should fullyMatch regex DATE_TIME_PATTERN
     }
   }
 
   test("when creating a new post should save post data correctly in repository") {
-    val alreadyExistingUser = createUser()
+    val user = createTestUser()
 
     for {
-      _          <- repo.save(alreadyExistingUser)
-      _          <- handler.handle(CreatePost(userId = alreadyExistingUser.userId, text = "a text"))
-      storedUser <- repo.get(alreadyExistingUser.userId)
+      _          <- repo.save(user)
+      _          <- handler.handle(CreatePost(userId = user.userId, text = "a text"))
+      storedUser <- repo.get(user.userId)
     } yield {
-      storedUser.isDefined shouldBe true
+      storedUser shouldBe defined
       val posts = storedUser.get.posts
       posts should have length 1
       val post = posts.head
@@ -67,7 +67,7 @@ class PostCreationHandlerSpec extends AsyncFunSuite with Matchers with BeforeAnd
   }
 
   test("when creating a new post appends to existing posts without losing any") {
-    val user = createUser()
+    val user = createTestUser()
 
     for {
       _      <- repo.save(user)
@@ -75,7 +75,7 @@ class PostCreationHandlerSpec extends AsyncFunSuite with Matchers with BeforeAnd
       _      <- handler.handle(CreatePost(userId = user.userId, text = "second"))
       stored <- repo.get(user.userId)
     } yield {
-      stored.isDefined shouldBe true
+      stored shouldBe defined
       val posts = stored.get.posts
       posts should have length 2
       val texts = posts.map(_.text)
@@ -84,20 +84,18 @@ class PostCreationHandlerSpec extends AsyncFunSuite with Matchers with BeforeAnd
   }
 
   test("when creating a new post uses fake clock for deterministic dateTime") {
-    val fixedClock            = Clock.fixed(Instant.parse(FIXED_DATE_ISO), ZoneOffset.UTC)
-    val handlerWithFixedClock = new PostCreationHandler(repo, uuidWrapper, fixedClock)
-    val user                  = createUser()
+    val handlerWithFixedClock = new PostCreationHandler(repo, uuidWrapper, fixedClock(FIXED_DATE_ISO))
+    val user                  = createTestUser()
 
     for {
       _      <- repo.save(user)
       result <- handlerWithFixedClock.handle(CreatePost(userId = user.userId, text = "time test"))
       stored <- repo.get(user.userId)
     } yield {
-      result.isRight shouldBe true
-      val created = result.getOrElse(fail("Expected Right but got Left"))
+      val created = assertRight(result)
       created.dateTime shouldBe FIXED_DATE_ISO
 
-      stored.isDefined shouldBe true
+      stored shouldBe defined
       val posts = stored.get.posts
       posts should have length 1
       posts.head.dateTime shouldBe FIXED_DATE_ISO
@@ -105,9 +103,8 @@ class PostCreationHandlerSpec extends AsyncFunSuite with Matchers with BeforeAnd
   }
 
   test("when user does not exist should throw UserNotFound") {
-    handler.handle(CreatePost(userId = uuidWrapper.generateUuid(), text = "missing")).map { result =>
-      result.isLeft shouldBe true
-      result.left.getOrElse(fail("Expected Left but got Right")) shouldBe UserNotFound
+    handler.handle(CreatePost(userId = randomId(), text = "missing")).map { result =>
+      assertLeft(result) shouldBe UserNotFound
     }
   }
 }

@@ -25,7 +25,7 @@ final class UserRoutes(
         post {
           entity(as[CreateUser]) { cmd =>
             onComplete(userRegistration.handle(cmd)) {
-              case Success(Right(created)) => complete(StatusCodes.Created -> created)
+              case Success(Right(created))              => complete(StatusCodes.Created -> created)
               case Success(Left(UsernameAlreadyExists)) =>
                 complete(StatusCodes.BadRequest -> ErrorMessage("Username already in use"))
               case Failure(_) => complete(StatusCodes.InternalServerError -> ErrorMessage("Internal server error"))
@@ -55,7 +55,7 @@ final class UserRoutes(
                 else {
                   val cmd = CreatePost(userId = userId, text = body.text)
                   onComplete(postCreation.handle(cmd)) {
-                    case Success(Right(created)) => complete(StatusCodes.Created -> created)
+                    case Success(Right(created))     => complete(StatusCodes.Created -> created)
                     case Success(Left(UserNotFound)) =>
                       complete(StatusCodes.NotFound -> ErrorMessage("User does not exist."))
                     case Success(Left(InvalidPost)) =>

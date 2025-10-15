@@ -8,7 +8,7 @@ import sttp.client4.httpclient.HttpClientSyncBackend
 
 object HttpTestUtils extends JsonProtocols {
   val backend: WebSocketSyncBackend = HttpClientSyncBackend()
-  val BASE_URI = "http://localhost:8080"
+  val BASE_URI                      = "http://localhost:8080"
 
   def generateRandomSuffix: String = {
     java.util.UUID.randomUUID().toString.take(8)

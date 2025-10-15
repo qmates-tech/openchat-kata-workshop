@@ -51,7 +51,7 @@ class UserRegistrationSpec extends AnyFunSuite with Matchers with JsonProtocols 
   }
 
   test("POST /users should return 400 BadRequest with message when username already exists") {
-    val username = s"dup-${generateRandomSuffix}"
+    val username      = s"dup-${generateRandomSuffix}"
     val firstResponse = basicRequest
       .post(uri"$BASE_URI/users")
       .contentType("application/json")
